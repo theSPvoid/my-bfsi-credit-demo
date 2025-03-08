@@ -27,8 +27,6 @@ logreg_model = joblib.load("logreg_model.pkl")
 dtree_model = joblib.load("dtree_model.pkl")
 feature_names = joblib.load("feature_names.pkl")
 
-st.title("BFSI Credit Risk Prototype with Firebase ERP Integration")
-
 st.sidebar.header("Enter Applicant Data")
 
 # 2. Collect user inputs
