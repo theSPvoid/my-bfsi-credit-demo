@@ -3,3 +3,5 @@ pandas
 numpy
 scikit-learn
 pyrebase4
+setuptools
+google-cloud-storage
