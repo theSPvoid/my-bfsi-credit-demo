@@ -5,18 +5,88 @@ import joblib
 import pyrebase
 from firebase_config import firebase_config
 
-#  DECORATIVE LANDING PAGE SECTION
-# --------------------------------------------
-st.markdown("<h1 style='text-align: center;'>XIM University</h1>", unsafe_allow_html=True)
+# 1. Define custom CSS (gradient background, center text, fade animation)
+st.markdown("""
+<style>
+    /* Make the entire page have a gradient background */
+    body {
+        background: linear-gradient(to right, #009fff, #ec2f4b);
+        margin: 0;
+        padding: 0;
+    }
+    /* Hide the default header and footer (optional) */
+    .css-18e3th9 {
+        padding: 0 !important;
+    }
+    .css-1lcbmhc {
+        padding: 0 !important;
+    }
 
-# If you want slightly smaller text or a subheader style:
-st.markdown("<h2 style='text-align: center;'>BIS Group Project</h2>", unsafe_allow_html=True)
+    /* Center container so content is in the middle. Adjust width if you prefer. */
+    .main {
+        max-width: 800px;
+        margin: 0 auto;
+    }
 
-# Another line for Group 8
-st.markdown("<h3 style='text-align: center;'>Group 8</h3>", unsafe_allow_html=True)
+    /* Title fadeDown animation */
+    h1.title {
+        font-family: "Arial Black", Gadget, sans-serif;
+        color: #ffffff;
+        text-align: center;
+        margin-top: 50px;
+        animation: fadeDown 1.5s ease-in;
+    }
+    h2.subtitle {
+        color: #ffe6e6;
+        text-align: center;
+        font-weight: normal;
+        animation: fadeDown 2s ease-in;
+    }
+    h3.group {
+        color: #ffffcc;
+        text-align: center;
+        animation: fadeDown 2.5s ease-in;
+    }
+    h4.project {
+        color: #ffffff;
+        text-align: center;
+        animation: fadeDown 3s ease-in;
+    }
 
-# Project / Demo name
-st.markdown("<h4 style='text-align: center;'>AI-Driven BFSI Credit Risk Demo</h4>", unsafe_allow_html=True)
+    @keyframes fadeDown {
+      0% {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# 2. Add the headings for your landing page
+st.markdown("<h1 class='title'>XIM University</h1>", unsafe_allow_html=True)
+st.markdown("<h2 class='subtitle'>BIS Group Project</h2>", unsafe_allow_html=True)
+st.markdown("<h3 class='group'>Group 8</h3>", unsafe_allow_html=True)
+st.markdown("<h4 class='project'>AI-Driven BFSI Credit Risk Demo</h4>", unsafe_allow_html=True)
+
+# 3. Load and display a Lottie animation (assuming you have 'finance_animation.json')
+try:
+    with open("finance_animation.json", "r") as f:
+        lottie_json = json.load(f)
+
+    st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300, width=None)
+except:
+    st.write("Lottie file not found. Skipping animation.")
+
+# 4. Add a small spacing line before continuing
+st.write("---")
+
+# Now you can continue with the BFSI input forms, model loading, etc.
+# Example (just placeholders):
+st.header("Enter Applicant Data (Below)")
 
 # 0. Initialize Firebase
 firebase = pyrebase.initialize_app(firebase_config)
