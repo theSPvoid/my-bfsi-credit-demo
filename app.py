@@ -66,9 +66,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Center the logo using columns
-col1, col2, col3 = st.columns([1,6,1])
+col1, col2 = st.columns([1, 3])
 with col2:
+    st.markdown('<div style="text-align: right;">', unsafe_allow_html=True)
     st.image("xim_logo.png", width=180)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # 3. Display the headings with animations
 st.markdown("<h1 class='title'>XIM University</h1>", unsafe_allow_html=True)
