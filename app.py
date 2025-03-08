@@ -66,7 +66,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Center the logo using columns
-col1, col2 = st.columns([1, 5])
+col1, col2 = st.columns([1, 1])
 with col2:
     st.markdown('<div style="text-align: right;">', unsafe_allow_html=True)
     st.image("xim_logo.png", width=180)
