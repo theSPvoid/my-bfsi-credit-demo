@@ -75,14 +75,18 @@ st.markdown("<h2 class='subtitle'>BIS Group Project</h2>", unsafe_allow_html=Tru
 st.markdown("<h3 class='group'>Group 8</h3>", unsafe_allow_html=True)
 st.markdown("<h4 class='project'>AI-Driven BFSI Credit Risk Demo</h4>", unsafe_allow_html=True)
 
-# 3. Load and display a Lottie animation (assuming you have 'finance_animation.json')
-try:
-    with open("finance_animation.json", "r") as f:
-        lottie_json = json.load(f)
+# Load Lottie Animation from GitHub Repository
+@st.cache_data
+def load_lottie_local(filepath: str):
+    with open(filepath, "r") as f:
+        return json.load(f)
 
-    st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300, width=None)
+# Load the saved JSON Lottie file from the GitHub repo folder
+try:
+    lottie_animation = load_lottie_local("finance_animation.json")  # Adjust path if needed
+    st_lottie(lottie_animation, height=300, key="finance_animation")
 except:
-    st.write("Lottie file not found. Skipping animation.")
+    st.write("Lottie animation file not found. Make sure 'finance_animation.json' is in the same GitHub folder.")
 
 # 4. Add a small spacing line before continuing
 st.write("---")
