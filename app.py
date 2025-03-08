@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import joblib
 import pyrebase
+import streamlit as st
+import json
+from streamlit_lottie import st_lottie
 from firebase_config import firebase_config
 
 # 1. Define custom CSS (gradient background, center text, fade animation)
