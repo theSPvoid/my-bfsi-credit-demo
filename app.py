@@ -66,6 +66,24 @@ st.markdown("""
         transform: translateY(0);
       }
     }
+  /* Change the sidebar background to black */
+        section[data-testid="stSidebar"] {
+            background-color: black !important;
+        }
+
+        /* Change text color inside sidebar to white */
+        section[data-testid="stSidebar"] * {
+            color: white !important;
+        }
+
+        /* Make the "Utility Payment Score" slider red */
+        div[data-testid="stWidget"][aria-label="Utility Payment Score"] .st-eb {
+            background: red !important;
+        }
+
+        /* Make slider thumb red */
+        div[data-testid="stWidget"][aria-label="Utility Payment Score"] .st-cx {
+            background: red !important;
 </style>
 """, unsafe_allow_html=True)
 
