@@ -5,6 +5,19 @@ import joblib
 import pyrebase
 from firebase_config import firebase_config
 
+#  DECORATIVE LANDING PAGE SECTION
+# --------------------------------------------
+st.markdown("<h1 style='text-align: center;'>XIM University</h1>", unsafe_allow_html=True)
+
+# If you want slightly smaller text or a subheader style:
+st.markdown("<h2 style='text-align: center;'>BIS Group Project</h2>", unsafe_allow_html=True)
+
+# Another line for Group 8
+st.markdown("<h3 style='text-align: center;'>Group 8</h3>", unsafe_allow_html=True)
+
+# Project / Demo name
+st.markdown("<h4 style='text-align: center;'>AI-Driven BFSI Credit Risk Demo</h4>", unsafe_allow_html=True)
+
 # 0. Initialize Firebase
 firebase = pyrebase.initialize_app(firebase_config)
 db = firebase.database()
