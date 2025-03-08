@@ -18,19 +18,14 @@ st.markdown("""
         padding: 0;
     }
     /* Hide the default header and footer (optional) */
-    .css-18e3th9 {
+    .css-18e3th9, .css-1lcbmhc {
         padding: 0 !important;
     }
-    .css-1lcbmhc {
-        padding: 0 !important;
-    }
-
-    /* Center container so content is in the middle. Adjust width if you prefer. */
+    /* Center container so content is in the middle */
     .main {
         max-width: 800px;
         margin: 0 auto;
     }
-
     /* Title fadeDown animation */
     h1.title {
         font-family: "Arial Black", Gadget, sans-serif;
@@ -55,7 +50,6 @@ st.markdown("""
         text-align: center;
         animation: fadeDown 3s ease-in;
     }
-
     @keyframes fadeDown {
       0% {
         opacity: 0;
@@ -66,32 +60,30 @@ st.markdown("""
         transform: translateY(0);
       }
     }
-  /* Change the sidebar background to black */
-        section[data-testid="stSidebar"] {
-            background-color: black !important;
-        }
-
-        /* Change text color inside sidebar to white */
-        section[data-testid="stSidebar"] * {
-            color: white !important;
-        }
-
-        /* Make the "Utility Payment Score" slider red */
-        div[data-testid="stWidget"][aria-label="Utility Payment Score"] .st-eb {
-            background: red !important;
-        }
-
-        /* Make slider thumb red */
-        div[data-testid="stWidget"][aria-label="Utility Payment Score"] .st-cx {
-            background: red !important;
-
-        .logo-container {
-            text-align: center;
-        }
-        .logo-container img {
-            width: 180px;  /* Adjust size as needed */
-            margin-bottom: 10px;
-        }
+    /* Change the sidebar background to black */
+    section[data-testid="stSidebar"] {
+        background-color: black !important;
+    }
+    /* Change text color inside sidebar to white */
+    section[data-testid="stSidebar"] * {
+        color: white !important;
+    }
+    /* Make the "Utility Payment Score" slider red */
+    div[data-testid="stWidget"][aria-label="Utility Payment Score"] .st-eb {
+        background: red !important;
+    }
+    /* Make slider thumb red */
+    div[data-testid="stWidget"][aria-label="Utility Payment Score"] .st-cx {
+        background: red !important;
+    }
+    /* Logo container styling */
+    .logo-container {
+        text-align: center;
+    }
+    .logo-container img {
+        width: 180px;  /* Adjust size as needed */
+        margin-bottom: 10px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
