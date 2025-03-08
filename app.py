@@ -11,20 +11,24 @@ from firebase_config import firebase_config
 # 1. Define custom CSS (gradient background, center text, fade animation)
 st.markdown("""
 <style>
-    /* Set a gradient background */
+    /* Gradient background for the entire page */
     body {
         background: linear-gradient(to right, #009fff, #ec2f4b);
         margin: 0;
         padding: 0;
     }
-    /* Hide default header/footer if needed */
-    .css-18e3th9, .css-1lcbmhc {
-        padding: 0 !important;
+    /* Make the sidebar background black and all its text white */
+    section[data-testid="stSidebar"] {
+        background-color: black !important;
     }
-    .main {
-        max-width: 800px;
-        margin: 0 auto;
+    section[data-testid="stSidebar"] * {
+        color: white !important;
     }
+    /* Change the accent color (slider color) for all range inputs in the sidebar to red */
+    section[data-testid="stSidebar"] input[type="range"] {
+        accent-color: red !important;
+    }
+    /* Custom heading styles with fade-down animation */
     h1.title {
         font-family: "Arial Black", Gadget, sans-serif;
         color: #ffffff;
@@ -49,18 +53,24 @@ st.markdown("""
         animation: fadeDown 3s ease-in;
     }
     @keyframes fadeDown {
-      0% { opacity: 0; transform: translateY(-20px); }
-      100% { opacity: 1; transform: translateY(0); }
+      0% {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Center the logo using columns
-col1, col2, col3 = st.columns([1, 2, 1])
+# 2. Center the logo using columns
+col1, col2, col3 = st.columns([1,2,1])
 with col2:
     st.image("xim_logo.png", width=180)
 
-# Then add the headings
+# 3. Display the headings with animations
 st.markdown("<h1 class='title'>XIM University</h1>", unsafe_allow_html=True)
 st.markdown("<h2 class='subtitle'>BIS Group Project</h2>", unsafe_allow_html=True)
 st.markdown("<h3 class='group'>Group 8</h3>", unsafe_allow_html=True)
