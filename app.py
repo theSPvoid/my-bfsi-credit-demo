@@ -84,6 +84,14 @@ st.markdown("""
         /* Make slider thumb red */
         div[data-testid="stWidget"][aria-label="Utility Payment Score"] .st-cx {
             background: red !important;
+
+        .logo-container {
+            text-align: center;
+        }
+        .logo-container img {
+            width: 180px;  /* Adjust size as needed */
+            margin-bottom: 10px;
+        }
 </style>
 """, unsafe_allow_html=True)
 
