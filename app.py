@@ -11,27 +11,25 @@ from firebase_config import firebase_config
 # 1. Define custom CSS (gradient background, center text, fade animation)
 st.markdown("""
 <style>
-    /* Make the entire page have a gradient background */
+    /* Set a gradient background */
     body {
         background: linear-gradient(to right, #009fff, #ec2f4b);
         margin: 0;
         padding: 0;
     }
-    /* Hide the default header and footer (optional) */
+    /* Hide default header/footer if needed */
     .css-18e3th9, .css-1lcbmhc {
         padding: 0 !important;
     }
-    /* Center container so content is in the middle */
     .main {
         max-width: 800px;
         margin: 0 auto;
     }
-    /* Title fadeDown animation */
     h1.title {
         font-family: "Arial Black", Gadget, sans-serif;
         color: #ffffff;
         text-align: center;
-        margin-top: 50px;
+        margin-top: 20px;
         animation: fadeDown 1.5s ease-in;
     }
     h2.subtitle {
@@ -51,44 +49,18 @@ st.markdown("""
         animation: fadeDown 3s ease-in;
     }
     @keyframes fadeDown {
-      0% {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    /* Change the sidebar background to black */
-    section[data-testid="stSidebar"] {
-        background-color: black !important;
-    }
-    /* Change text color inside sidebar to white */
-    section[data-testid="stSidebar"] * {
-        color: white !important;
-    }
-    /* Make the "Utility Payment Score" slider red */
-    div[data-testid="stWidget"][aria-label="Utility Payment Score"] .st-eb {
-        background: red !important;
-    }
-    /* Make slider thumb red */
-    div[data-testid="stWidget"][aria-label="Utility Payment Score"] .st-cx {
-        background: red !important;
-    }
-    /* Logo container styling */
-    .logo-container {
-        text-align: center;
-    }
-    .logo-container img {
-        width: 180px;  /* Adjust size as needed */
-        margin-bottom: 10px;
+      0% { opacity: 0; transform: translateY(-20px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 2. Add the headings for your landing page
-st.markdown('<div class="logo-container"><img src="xim_logo.png"></div>', unsafe_allow_html=True)
+# Center the logo using columns
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.image("xim_logo.png", width=180)
+
+# Then add the headings
 st.markdown("<h1 class='title'>XIM University</h1>", unsafe_allow_html=True)
 st.markdown("<h2 class='subtitle'>BIS Group Project</h2>", unsafe_allow_html=True)
 st.markdown("<h3 class='group'>Group 8</h3>", unsafe_allow_html=True)
