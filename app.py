@@ -67,7 +67,7 @@ st.markdown("""
 
 st.markdown("""
 <div style="text-align: center;">
-    <img src="https://raw.githubusercontent.com/yourusername/your-repo/main/xim_logo.png" alt="XIM University Logo" width="180">
+    <img src="https://raw.githubusercontent.com/theSPvoid/my-bfsi-credit-demo/main/xim_logo.png" alt="XIM University Logo" width="180">
 </div>
 """, unsafe_allow_html=True)
 
