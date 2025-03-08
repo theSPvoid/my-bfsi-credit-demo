@@ -88,6 +88,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 2. Add the headings for your landing page
+st.markdown('<div class="logo-container"><img src="xim_logo.png"></div>', unsafe_allow_html=True)
 st.markdown("<h1 class='title'>XIM University</h1>", unsafe_allow_html=True)
 st.markdown("<h2 class='subtitle'>BIS Group Project</h2>", unsafe_allow_html=True)
 st.markdown("<h3 class='group'>Group 8</h3>", unsafe_allow_html=True)
