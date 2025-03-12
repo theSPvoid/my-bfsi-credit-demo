@@ -176,7 +176,7 @@ if st.sidebar.button("Predict & Save to Firebase"):
         z += weights.get(feature, 0) * value
 
     # 5. Calculate probability using the sigmoid function:
-    prob = 1 / (1 + math.exp(-z))
+    prob = 1 / (1 + np.exp(-z))
 
     # For the manual decision tree simulation, we adjust the logic:
     if model_choice == "Manual Decision Tree":
