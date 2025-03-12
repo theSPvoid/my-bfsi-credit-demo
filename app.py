@@ -108,97 +108,118 @@ feature_names = joblib.load("feature_names.pkl")
 
 st.sidebar.header("Enter Applicant Data")
 
-# 2. Collect user inputs
+# 1. Collect user inputs
 Gender = st.sidebar.selectbox("Gender", ["Male","Female"])
 Married = st.sidebar.selectbox("Married?", ["No","Yes"])
-Dependents = st.sidebar.slider("Dependents", 0,3,0)
+Dependents = st.sidebar.slider("Dependents", 0, 3, 0)
 Education = st.sidebar.selectbox("Education", ["Graduate","Not Graduate"])
 Self_Employed = st.sidebar.selectbox("Self Employed?", ["No","Yes"])
 ApplicantIncome = st.sidebar.number_input("Applicant Income", min_value=0, value=5000)
 CoapplicantIncome = st.sidebar.number_input("Co-applicant Income", min_value=0, value=0)
 LoanAmount = st.sidebar.number_input("Loan Amount (in thousands)", min_value=0, value=100)
-Loan_Amount_Term = st.sidebar.selectbox("Loan Term (months)", [360,240,180,120])
-Credit_History = st.sidebar.selectbox("Credit History (1=Yes,0=No)", [1.0,0.0])
-Property_Area = st.sidebar.selectbox("Property Area", ["Rural","Semiurban","Urban"])
+Loan_Amount_Term = st.sidebar.selectbox("Loan Term (months)", [360, 240, 180, 120])
+Credit_History = st.sidebar.selectbox("Credit History (1=Yes, 0=No)", [1.0, 0.0])
+Property_Area = st.sidebar.selectbox("Property Area", ["Rural", "Semiurban", "Urban"])
 
 # Alternative data
-Utility_Payment_Score = st.sidebar.slider("Utility Payment Score", 0.0,1.0,0.5,0.01)
-Mobile_Transactions = st.sidebar.slider("Mobile Transactions/month", 0,200,50)
-Social_Media_Score = st.sidebar.slider("Social Media Score", 0,10,5)
+Utility_Payment_Score = st.sidebar.slider("Utility Payment Score", 0.0, 1.0, 0.5, 0.01)
+Mobile_Transactions = st.sidebar.slider("Mobile Transactions/month", 0, 200, 50)
+Social_Media_Score = st.sidebar.slider("Social Media Score", 0, 10, 5)
 
-model_choice = st.sidebar.selectbox("Model", ["Logistic Regression","Decision Tree"])
+# For demonstration, we simulate manual model calculations rather than using pre-trained models.
+model_choice = st.sidebar.selectbox("Model", ["Manual Logistic Regression", "Manual Decision Tree"])
 
 if st.sidebar.button("Predict & Save to Firebase"):
-    # 3. Build a single row DataFrame for our models
-    single_row = pd.DataFrame(np.zeros((1,len(feature_names))), columns=feature_names)
-
-    # Numeric columns
-    numeric_map = {
-        'ApplicantIncome': ApplicantIncome,
-        'CoapplicantIncome': CoapplicantIncome,
-        'LoanAmount': LoanAmount,
-        'Loan_Amount_Term': Loan_Amount_Term,
-        'Credit_History': Credit_History,
-        'Dependents': Dependents,
-        'Utility_Payment_Score': Utility_Payment_Score,
-        'Mobile_Transactions': Mobile_Transactions,
-        'Social_Media_Score': Social_Media_Score
+    # 2. Define explicit weights for each input (these are illustrative and can be tuned)
+    weights = {
+        'ApplicantIncome': 0.00005,          # Small positive weight: higher income increases credit score.
+        'CoapplicantIncome': 0.00003,          # Similar, but a bit smaller.
+        'LoanAmount': -0.002,                  # Negative weight: larger loan amount lowers credit score.
+        'Loan_Amount_Term': 0.001,             # Slight positive weight: longer term can help.
+        'Credit_History': 2.5,                 # Strong positive weight: good credit history greatly increases probability.
+        'Dependents': -0.05,                   # More dependents may slightly lower credit score.
+        'Utility_Payment_Score': 2.0,          # Very high weight: excellent utility payments boost score.
+        'Mobile_Transactions': 0.001,          # Small positive effect: more transactions imply financial activity.
+        'Social_Media_Score': 0.05,            # Modest positive weight.
+        'Gender_Male': 0.1,                    # Slight positive impact if male (example).
+        'Married_Yes': 0.2,                    # Being married can be seen as stability.
+        'Education_Not Graduate': -0.2,        # Not graduating lowers score.
+        'Self_Employed_Yes': -0.1,             # Slightly negative impact if self-employed.
+        'Property_Area_Semiurban': 0.1,        # Positive impact if semiurban.
+        'Property_Area_Urban': 0.2             # Higher positive impact if urban.
     }
-    for col,val in numeric_map.items():
-        if col in single_row.columns:
-            single_row[col] = val
+    bias = -1  # Intercept term
 
-    # Dummy columns for the categories
-    if 'Gender_Male' in single_row.columns and Gender=='Male':
-        single_row['Gender_Male'] = 1
-    if 'Married_Yes' in single_row.columns and Married=='Yes':
-        single_row['Married_Yes'] = 1
-    if 'Education_Not Graduate' in single_row.columns and Education=='Not Graduate':
-        single_row['Education_Not Graduate'] = 1
-    if 'Self_Employed_Yes' in single_row.columns and Self_Employed=='Yes':
-        single_row['Self_Employed_Yes'] = 1
-    if 'Property_Area_Semiurban' in single_row.columns and Property_Area=='Semiurban':
-        single_row['Property_Area_Semiurban'] = 1
-    if 'Property_Area_Urban' in single_row.columns and Property_Area=='Urban':
-        single_row['Property_Area_Urban'] = 1
+    # 3. Construct the input vector manually
+    x = {}
+    x['ApplicantIncome'] = ApplicantIncome
+    x['CoapplicantIncome'] = CoapplicantIncome
+    x['LoanAmount'] = LoanAmount
+    x['Loan_Amount_Term'] = Loan_Amount_Term
+    x['Credit_History'] = Credit_History
+    x['Dependents'] = Dependents
+    x['Utility_Payment_Score'] = Utility_Payment_Score
+    x['Mobile_Transactions'] = Mobile_Transactions
+    x['Social_Media_Score'] = Social_Media_Score
 
-    # 4. Predict Probability & Outcome
-    if model_choice=="Logistic Regression":
-        prob_approve = logreg_model.predict_proba(single_row)[0][1]
-    else:
-        prob_approve = dtree_model.predict_proba(single_row)[0][1]
+    # Categorical dummies:
+    x['Gender_Male'] = 1 if Gender == "Male" else 0
+    x['Married_Yes'] = 1 if Married == "Yes" else 0
+    x['Education_Not Graduate'] = 1 if Education == "Not Graduate" else 0
+    x['Self_Employed_Yes'] = 1 if Self_Employed == "Yes" else 0
+    x['Property_Area_Semiurban'] = 1 if Property_Area == "Semiurban" else 0
+    x['Property_Area_Urban'] = 1 if Property_Area == "Urban" else 0
 
-    prediction = 1 if prob_approve>=0.5 else 0
+    # 4. Calculate the weighted sum z
+    z = bias
+    for feature, value in x.items():
+        z += weights.get(feature, 0) * value
 
-    # 5. Convert prob -> Credit Score (Indian style: 300-900)
-    credit_score = 300 + (prob_approve * 600)
+    # 5. Calculate probability using the sigmoid function:
+    prob = 1 / (1 + math.exp(-z))
 
-    # Show result
-    if prediction==1:
+    # For the manual decision tree simulation, we adjust the logic:
+    if model_choice == "Manual Decision Tree":
+        # For decision trees, the flow is sequential. We simulate it:
+        # Start with base probability based on credit history:
+        base_prob = 0.3 if Credit_History == 0.0 else 0.7
+        # Then, modify based on utility payment score:
+        # For every 0.1 above 0.5, increase probability by 0.03, and vice versa.
+        utility_effect = (Utility_Payment_Score - 0.5) * 0.3
+        # Also consider income: if ApplicantIncome > 20000, add 0.05
+        income_effect = 0.05 if ApplicantIncome > 20000 else 0
+        prob = base_prob + utility_effect + income_effect
+        prob = max(0, min(prob, 1))  # Clamp between 0 and 1
+    
+    prediction = 1 if prob >= 0.5 else 0
+
+    # 6. Convert probability to Indian-style Credit Score (300 to 900)
+    credit_score = 300 + (prob * 600)
+
+    # 7. Display the result
+    if prediction == 1:
         st.success("Loan Approved!")
     else:
-        st.error("Loan Denied")
+        st.error("Loan Denied!")
+    st.write(f"**Credit Score:** {int(round(credit_score, 0))}")
+    st.write(f"**Approval Probability:** {round(prob, 3)}")
 
-    st.write(f"**Credit Score**: {int(round(credit_score,0))}")
-
-    # 6. Build a short explanation (heuristic-based)
+    # 8. Build a short heuristic-based explanation
     explanation_list = []
-    if Credit_History==0.0:
-        explanation_list.append("No credit history -> lowers approval odds.")
+    if Credit_History == 0.0:
+        explanation_list.append("No credit history reduces approval odds.")
     else:
-        explanation_list.append("Positive credit history -> boosts approval odds.")
-
+        explanation_list.append("Good credit history boosts approval odds.")
     if Utility_Payment_Score < 0.3:
-        explanation_list.append("Low utility payment score -> risk of late bill payments.")
+        explanation_list.append("Low utility payment score suggests risk of late payments.")
     elif Utility_Payment_Score > 0.7:
-        explanation_list.append("High utility payment score -> strong on-time payment history.")
-
-    # etc. (Add more if you like)
+        explanation_list.append("High utility payment score indicates strong on-time payments.")
+    # More explanations can be added similarly.
     st.write("### Explanation:")
     for expl in explanation_list:
         st.write("-", expl)
 
-    # 7. Save the data + result to Firebase
+    # 9. Save applicant data and results to Firebase
     applicant_data = {
         "Gender": Gender,
         "Married": Married,
@@ -215,14 +236,12 @@ if st.sidebar.button("Predict & Save to Firebase"):
         "Mobile_Transactions": Mobile_Transactions,
         "Social_Media_Score": Social_Media_Score,
         "ModelUsed": model_choice,
-        "ProbabilityOfApproval": round(prob_approve,3),
-        "Prediction": "Approved" if prediction==1 else "Denied",
-        "CreditScore": int(round(credit_score,0))
+        "CalculatedProbability": round(prob, 3),
+        "Prediction": "Approved" if prediction == 1 else "Denied",
+        "CreditScore": int(round(credit_score, 0))
     }
-
     db.child("loan_applications").push(applicant_data)
-    st.info("Applicant data + result saved to Firebase Realtime Database.")
-
+    st.info("Applicant data and result saved to Firebase Realtime Database.")
 
 st.markdown("---")
 st.subheader("Retrieve Records from Firebase")
