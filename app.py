@@ -108,7 +108,7 @@ feature_names = joblib.load("feature_names.pkl")
 
 st.sidebar.header("Enter Applicant Data")
 
-# Collect user inputs
+# 1. Collect user inputs
 Gender = st.sidebar.selectbox("Gender", ["Male","Female"])
 Married = st.sidebar.selectbox("Married?", ["No","Yes"])
 Dependents = st.sidebar.slider("Dependents", 0, 3, 0)
@@ -130,31 +130,40 @@ model_choice = st.sidebar.selectbox("Model", ["Manual Logistic Regression", "Man
 
 if st.sidebar.button("Predict & Save to Firebase"):
 
-    # Define explicit weights for each input (illustrative values)
+    # 2. Define explicit weights for each input (illustrative)
+    # We'll treat LoanAmount by ratio to (ApplicantIncome + CoapplicantIncome + 1) to avoid huge negative sums
     weights = {
-        'ApplicantIncome': 0.00005,          # Higher income increases score
-        'CoapplicantIncome': 0.00003,          # Slight positive impact
-        'LoanAmount': -0.002,                  # Higher loan amount lowers score
-        'Loan_Amount_Term': 0.001,             # Slight positive impact
-        'Credit_History': 2.5,                 # Good credit history boosts score significantly
-        'Dependents': -0.05,                   # More dependents slightly lower score
-        'Utility_Payment_Score': 2.0,          # Excellent utility score strongly boosts score
-        'Mobile_Transactions': 0.001,          # Small positive impact
-        'Social_Media_Score': 0.05,            # Modest positive impact
-        'Gender_Male': 0.1,                    # Slight positive if Male (example)
-        'Married_Yes': 0.2,                    # Being married is positive
-        'Education_Not Graduate': -0.2,        # Not graduating lowers score
-        'Self_Employed_Yes': -0.1,             # Slight negative impact if self-employed
-        'Property_Area_Semiurban': 0.1,        # Positive impact
-        'Property_Area_Urban': 0.2             # Higher positive impact
+        'ApplicantIncome': 0.00005,         # Higher incomes => higher probability
+        'CoapplicantIncome': 0.00003,       # Additional income => small positive
+        'Loan_Amount_Ratio': -0.05,         # Compare loan to total income
+        'Loan_Amount_Term': 0.001,          # Slight positive if longer term
+        'Credit_History': 2.5,             # Good credit => strong boost
+        'Dependents': -0.05,               # More dependents => slightly lower
+        'Utility_Payment_Score': 2.0,       # High utility => strong positive
+        'Mobile_Transactions': 0.001,       # More transactions => small positive
+        'Social_Media_Score': 0.05,         # Modest positive
+        'Gender_Male': 0.1,                 # Slight positive if male
+        'Married_Yes': 0.2,                 # Being married => stability
+        'Education_Not Graduate': -0.2,     # Not graduate => negative
+        'Self_Employed_Yes': -0.1,          # Slight negative
+        'Property_Area_Semiurban': 0.1,     # Semiurban => mild positive
+        'Property_Area_Urban': 0.2          # Urban => stronger positive
     }
     bias = -1  # Intercept term
 
-    # Construct the input dictionary
+    # 3. Construct the input dictionary
     x = {}
+
+    # We'll define a ratio: LoanAmount / (ApplicantIncome + CoapplicantIncome + 1)
+    # This keeps large LoanAmounts from dominating
+    total_income = ApplicantIncome + CoapplicantIncome + 1
+    loan_income_ratio = 0
+    if total_income > 0:
+        loan_income_ratio = LoanAmount / total_income
+
     x['ApplicantIncome'] = ApplicantIncome
     x['CoapplicantIncome'] = CoapplicantIncome
-    x['LoanAmount'] = LoanAmount
+    x['Loan_Amount_Ratio'] = loan_income_ratio
     x['Loan_Amount_Term'] = Loan_Amount_Term
     x['Credit_History'] = Credit_History
     x['Dependents'] = Dependents
@@ -170,65 +179,74 @@ if st.sidebar.button("Predict & Save to Firebase"):
     x['Property_Area_Semiurban'] = 1 if Property_Area == "Semiurban" else 0
     x['Property_Area_Urban'] = 1 if Property_Area == "Urban" else 0
 
-    # Calculate the weighted sum (z) for Logistic Regression
+    # 4. Calculate Weighted Sum (z) for the logistic approach
     z = bias
     for feature, value in x.items():
-        z += weights.get(feature, 0) * value
+        w = weights.get(feature, 0)
+        z += w * value
 
-    # To prevent overflow, clip z to a reasonable range:
-    z = np.clip(z, -100, 100)
-    
-    # Calculate probability using the sigmoid function:
+    # We'll remove clipping of z so you can see real changes:
+    # but to avoid extreme overflow in math.exp, let's do a smaller clamp
+    z = np.clip(z, -20, 20)  # This is a mild clamp
+
+    # 5. Probability using the Sigmoid (Manual Logistic Regression)
     prob_log = 1 / (1 + np.exp(-z))
 
-    # For Manual Decision Tree simulation:
+    # 6. Manual Decision Tree simulation
     if model_choice == "Manual Decision Tree":
-        # Start with a base probability based on Credit_History:
+        # Start with base prob depending on credit history
         base_prob = 0.3 if Credit_History == 0.0 else 0.7
-        # Adjust probability based on Utility Payment Score:
-        # For every 0.1 above 0.5, add 0.03; below 0.5, subtract 0.03
+        # Adjust for Utility Payment Score:
+        # e.g., if Utility_Payment_Score = 0.9 => +0.4 above 0.5 => 0.4 * 0.3 = +0.12
         utility_effect = (Utility_Payment_Score - 0.5) * 0.3
-        # Adjust for Income: if ApplicantIncome > 20000 add 0.05, else subtract 0.05
-        income_effect = 0.05 if ApplicantIncome > 20000 else -0.05
-        prob_tree = base_prob + utility_effect + income_effect
-        # Ensure probability is between 0 and 1:
+        # Adjust for income: if (ApplicantIncome + CoapplicantIncome) > 20000 => +0.05, else -0.05
+        if (ApplicantIncome + CoapplicantIncome) > 20000:
+            income_effect = 0.05
+        else:
+            income_effect = -0.05
+        # Loan Ratio effect: if loan_income_ratio is too high => reduce prob
+        # e.g., if ratio > 5 => reduce 0.1
+        ratio_effect = 0
+        if loan_income_ratio > 5:
+            ratio_effect = -0.1
+        prob_tree = base_prob + utility_effect + income_effect + ratio_effect
         prob_tree = max(0, min(prob_tree, 1))
         prob = prob_tree
     else:
         prob = prob_log
 
-    # Determine final prediction:
     prediction = 1 if prob >= 0.5 else 0
 
-    # Convert probability to Credit Score (300-900 scale)
+    # Convert Probability to Credit Score (300-900)
     credit_score = 300 + (prob * 600)
 
-    # Debug: Output intermediate values
-    st.write("Weighted sum (z):", round(z, 3))
-    st.write("Calculated probability:", round(prob, 3))
+    # Debug: Show Weighted Sum, Probability, Loan Ratio
+    st.write("Weighted sum (z):", round(z, 4))
+    st.write("Calculated Probability:", round(prob, 4))
+    st.write("Loan-Income Ratio:", round(loan_income_ratio, 4))
 
-    # Display the result:
+    # Show result
     if prediction == 1:
         st.success("Loan Approved!")
     else:
         st.error("Loan Denied!")
     st.write(f"**Credit Score:** {int(round(credit_score, 0))}")
 
-    # Build a short explanation:
+    # Simple explanation
     explanation_list = []
     if Credit_History == 0.0:
-        explanation_list.append("No credit history reduces approval odds significantly.")
+        explanation_list.append("No credit history lowers approval odds.")
     else:
-        explanation_list.append("Good credit history greatly boosts approval odds.")
+        explanation_list.append("Good credit history strongly boosts approval odds.")
     if Utility_Payment_Score < 0.3:
-        explanation_list.append("Low utility payment score indicates high risk of late payments.")
+        explanation_list.append("Low utility payment score => risk of late bill payments.")
     elif Utility_Payment_Score > 0.7:
-        explanation_list.append("High utility payment score indicates strong, consistent bill payments.")
+        explanation_list.append("High utility payment score => strong on-time payments.")
     st.write("### Explanation:")
     for expl in explanation_list:
         st.write("-", expl)
 
-    # Save applicant data and results to Firebase:
+    # Save data + result to Firebase
     applicant_data = {
         "Gender": Gender,
         "Married": Married,
@@ -237,7 +255,7 @@ if st.sidebar.button("Predict & Save to Firebase"):
         "Self_Employed": Self_Employed,
         "ApplicantIncome": ApplicantIncome,
         "CoapplicantIncome": CoapplicantIncome,
-        "LoanAmount": LoanAmount,
+        "LoanAmount_in_thousands": LoanAmount,
         "Loan_Amount_Term": Loan_Amount_Term,
         "Credit_History": float(Credit_History),
         "Property_Area": Property_Area,
@@ -245,7 +263,7 @@ if st.sidebar.button("Predict & Save to Firebase"):
         "Mobile_Transactions": Mobile_Transactions,
         "Social_Media_Score": Social_Media_Score,
         "ModelUsed": model_choice,
-        "CalculatedProbability": round(prob, 3),
+        "CalculatedProbability": round(prob, 4),
         "Prediction": "Approved" if prediction == 1 else "Denied",
         "CreditScore": int(round(credit_score, 0))
     }
